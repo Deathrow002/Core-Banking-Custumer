@@ -30,27 +30,6 @@ Customer microservice for the Core Banking system. Manages customer profiles and
 
 ## Request Example
 
-### Create Customer
-```json
-POST /customers
-Authorization: Bearer <jwt_token>
-Content-Type: application/json
-
-{
-  "firstName": "John",
-  "lastName": "Doe",
-  "email": "john.doe@example.com",
-  "addresses": [
-    {
-      "type": "HOME",
-      "street": "123 Main St",
-      "city": "Bangkok",
-      "country": "Thailand"
-    }
-  ]
-}
-```
-
 ## Configuration
 
 Default port: `8082`
