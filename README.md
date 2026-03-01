@@ -28,8 +28,6 @@ Customer microservice for the Core Banking system. Manages customer profiles and
 | GET | `/customers/validateByData` | Validate customer data | ADMIN, MANAGER |
 | PUT | `/customers?customerId={uuid}` | Update customer | ADMIN, MANAGER |
 
-## Request Example
-
 ## Configuration
 
 Default port: `8082`
