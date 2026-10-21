@@ -202,7 +202,7 @@ class MobileSecurityTest {
             .issueTime(Date.from(now.minusSeconds(600)))
             .notBeforeTime(Date.from(variation.equals("future") ? now.plusSeconds(600) : now.minusSeconds(600)))
             .claim("scope", variation.equals("scope") ? "openid" : "banking")
-            .claim("role", variation.equals("user") ? "ROLE_USER" : variation.equals("bad-role") ? "ADMIN" : "ROLE_ADMIN");
+            .claim("role", variation.equals("user") ? "ROLE_CUSTOMER" : variation.equals("bad-role") ? "ADMIN" : "ROLE_ADMIN");
         if (!variation.equals("no-customer")) claims.claim("customerId", "customer-123");
         if (!variation.equals("no-expiry")) {
             claims.expirationTime(Date.from(variation.equals("expired") ? now.minusSeconds(120) : now.plusSeconds(300)));
