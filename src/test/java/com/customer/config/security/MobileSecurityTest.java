@@ -1,6 +1,7 @@
 package com.customer.config.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -37,6 +38,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -154,6 +156,20 @@ class MobileSecurityTest {
             .andExpect(status().isUnauthorized());
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"ROLE_ADMIN", "ROLE_MANAGER"})
+    void staffCanSearchCustomers(String role) throws Exception {
+        when(service.searchCustomers(any(), any())).thenReturn(new PageImpl<>(List.of()));
+        mvc.perform(get("/customers/search").param("query", "ann").session(browserSession(role)))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void customersCannotSearchCustomers() throws Exception {
+        mvc.perform(get("/customers/search").session(browserSession("ROLE_CUSTOMER")))
+            .andExpect(status().isForbidden());
+    }
+
     @Test
     void bankingScopeIsMandatory() throws Exception {
         mvc.perform(get(MOBILE).header("Authorization", "Bearer " + token("scope")))
@@ -175,7 +191,7 @@ class MobileSecurityTest {
             org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping.class);
         var routes = mapping.getHandlerMethods().entrySet().stream()
             .filter(entry -> entry.getValue().getBeanType().equals(CustomerController.class)).toList();
-        assertThat(routes).hasSize(6);
+        assertThat(routes).hasSize(7);
         routes.forEach(entry -> {
             var paths = entry.getKey().getPatternValues();
             var original = paths.stream().filter(path -> !path.startsWith("/api/mobile")).findFirst().orElseThrow();
@@ -184,8 +200,12 @@ class MobileSecurityTest {
     }
 
     private MockHttpSession browserSession() {
+        return browserSession("ROLE_ADMIN");
+    }
+
+    private MockHttpSession browserSession(String role) {
         var authentication = UsernamePasswordAuthenticationToken.authenticated("admin@example.test", null,
-            List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
+            List.of(new SimpleGrantedAuthority(role)));
         var securityContext = SecurityContextHolder.createEmptyContext();
         securityContext.setAuthentication(authentication);
         var session = new MockHttpSession();

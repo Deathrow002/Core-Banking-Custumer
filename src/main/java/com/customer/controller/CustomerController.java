@@ -3,6 +3,10 @@ package com.customer.controller;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.customer.model.Customer;
+import com.customer.model.DTO.CustomerPage;
 import com.customer.service.CustomerService;
 
 import lombok.RequiredArgsConstructor;
@@ -48,6 +53,19 @@ public class CustomerController {
     public ResponseEntity<List<Customer>> getAllCustomers() {
         List<Customer> customers = customerService.getAllCustomers();
         return new ResponseEntity<>(customers, HttpStatus.OK);
+    }
+
+    // Search customers for staff pickers (paged)
+    @GetMapping("/search")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public ResponseEntity<CustomerPage> searchCustomers(
+            @RequestParam(required = false) String query,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        Pageable pageable = PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 100), Sort.by("lastName"));
+        Page<Customer> result = customerService.searchCustomers(query, pageable);
+        return new ResponseEntity<>(new CustomerPage(result.getContent(), result.getTotalElements(),
+                result.getTotalPages(), result.getNumber(), result.getSize()), HttpStatus.OK);
     }
 
     // Customer Exists by ID

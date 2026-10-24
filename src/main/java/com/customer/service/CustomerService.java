@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -103,6 +105,19 @@ public class CustomerService {
         } catch (Exception e) {
             log.error("Error retrieving all customers: {}", e.getMessage());
             throw new RuntimeException("An error occurred while retrieving customers.", e);
+        }
+    }
+
+    // Search customers by name, email or national ID; blank query returns all customers
+    public Page<Customer> searchCustomers(String query, Pageable pageable) {
+        try {
+            if (query == null || query.isBlank()) {
+                return customerRepository.findAll(pageable);
+            }
+            return customerRepository.search(query.trim(), pageable);
+        } catch (Exception e) {
+            log.error("Error searching customers: {}", e.getMessage());
+            throw new RuntimeException("An error occurred while searching customers.", e);
         }
     }
 
