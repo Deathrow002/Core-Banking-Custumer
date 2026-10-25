@@ -133,6 +133,15 @@ public class CustomerService {
             existingCustomer.setLastName(customerDetails.getLastName());
             existingCustomer.setNationalId(customerDetails.getNationalId());
             existingCustomer.setEmail(customerDetails.getEmail());
+            if (customerDetails.getPhoneNumber() != null) {
+                existingCustomer.setPhoneNumber(customerDetails.getPhoneNumber());
+            }
+            if (customerDetails.getDateOfBirth() != null) {
+                existingCustomer.setDateOfBirth(customerDetails.getDateOfBirth());
+            }
+            if (customerDetails.getStatus() != null) {
+                existingCustomer.setStatus(customerDetails.getStatus());
+            }
 
             // Save updated customer
             return customerRepository.save(existingCustomer);
@@ -140,5 +149,14 @@ public class CustomerService {
             log.error("Error updating customer: {}", e.getMessage());
             throw new RuntimeException("An error occurred while updating the customer.", e);
         }
+    }
+
+    // Delete customer (addresses are removed by cascade)
+    @Transactional
+    public void deleteCustomer(UUID customerId) {
+        if (!customerRepository.existsById(customerId)) {
+            throw new RuntimeException("Customer not found");
+        }
+        customerRepository.deleteById(customerId);
     }
 }
